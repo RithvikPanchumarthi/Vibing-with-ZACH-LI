@@ -1,5 +1,16 @@
 # skills.md — Development Standards & Patterns
 
+## Agent Skills (Cursor)
+
+Installed into `~/.cursor/skills/`:
+- `clone-anywebsite` (web cloning playbook)
+- `create-skill` (scaffold new skills)
+- `posthog-analytics` (PostHog dashboard automation)
+
+Usage (in Cursor chat):
+- Run `/clone-anywebsite` (or `/create-skill`, `/posthog-analytics`)
+- If they don’t appear yet, restart Cursor once after installation.
+
 ## Tailwind CSS v4 Rules
 - Use `@import "tailwindcss"` in `globals.css` (not `@tailwind` directives)
 - PostCSS plugin: `@tailwindcss/postcss` (not `tailwindcss` directly)

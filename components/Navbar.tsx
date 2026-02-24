@@ -1,22 +1,21 @@
 import Link from "next/link";
 
 const navLinks = [
-  { label: "Hire now", href: "/hire" },
   { label: "Find a job", href: "/jobs" },
-  { label: "Career centers", href: "/career-centers" },
-  { label: "Handshake AI", href: "/ai" },
-  { label: "Research", href: "/research" },
+  { label: "Hire now", href: "/hire" },
+  { label: "Workvibe Events", href: "/events" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
   return (
     <header className="w-full px-6 py-4">
-      <nav className="mx-auto flex max-w-[1400px] items-center justify-between">
+      <nav className="relative mx-auto flex max-w-[1400px] items-center justify-between">
         <Link href="/" className="text-2xl font-bold italic text-brand">
-          Handshake
+          WorkVibe
         </Link>
 
-        <ul className="hidden items-center gap-8 md:flex">
+        <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <li key={link.label}>
               <Link

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Anton } from "next/font/google";
+import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -14,7 +15,7 @@ const anton = Anton({
 });
 
 export const metadata: Metadata = {
-  title: "Handshake — Where Career Starts",
+  title: "WorkVibe — Where Career Starts",
   description:
     "The universal talent marketplace connecting students, job seekers, and employers.",
 };
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${anton.variable} font-sans antialiased`}>
         {children}
+        <Footer />
       </body>
     </html>
   );

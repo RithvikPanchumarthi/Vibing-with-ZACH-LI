@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -31,6 +31,7 @@ export async function POST(req: Request) {
   if (user.isPremium) return jsonError("User is already premium.", 409);
 
   const origin = req.headers.get("origin") ?? "http://localhost:3000";
+  const stripe = getStripe();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

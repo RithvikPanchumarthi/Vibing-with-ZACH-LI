@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthControls from "@/components/auth/AuthControls";
 
 const navLinks = [
   { label: "Find a job", href: "/jobs" },
@@ -28,20 +29,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="rounded-lg border border-white/20 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/5"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-brand-dark"
-          >
-            Sign up
-          </Link>
-        </div>
+        <AuthControls />
       </nav>
     </header>
   );

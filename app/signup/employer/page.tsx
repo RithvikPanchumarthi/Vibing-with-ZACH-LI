@@ -1,12 +1,14 @@
 "use client";
 
 import { TagInput } from "@/components/ui/TagInput";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function EmployerSignupPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [roleName, setRoleName] = useState("");
   const [responsibilities, setResponsibilities] = useState("");
@@ -24,6 +26,7 @@ export default function EmployerSignupPage() {
 
   const isValid =
     email.trim().length > 0 &&
+    password.length >= 8 &&
     companyName.trim().length > 0 &&
     roleName.trim().length > 0 &&
     responsibilities.trim().length > 0 &&
@@ -39,6 +42,22 @@ export default function EmployerSignupPage() {
 
     setSubmitting(true);
     try {
+      const supabase = createSupabaseBrowserClient();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? window.location.origin;
+
+      const { error: signupError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${baseUrl}/api/auth/callback?next=/dashboard`,
+        },
+      });
+      if (signupError) {
+        setError(signupError.message);
+        return;
+      }
+
       const res = await fetch("/api/onboarding/employer", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -72,7 +91,11 @@ export default function EmployerSignupPage() {
         const id = (data as Record<string, unknown>).userId;
         return typeof id === "string" ? id : null;
       })();
-      window.location.href = userId ? `/signup/success?userId=${encodeURIComponent(userId)}` : "/signup/success";
+      if (userId) {
+        window.location.href = `/dashboard/employer?employerId=${encodeURIComponent(userId)}`;
+      } else {
+        window.location.href = "/login";
+      }
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -111,6 +134,18 @@ export default function EmployerSignupPage() {
               placeholder="you@company.com"
               className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20"
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-cream">Password</label>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              minLength={8}
+              placeholder="••••••••"
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20"
+            />
+            <p className="text-xs text-white/45">Minimum 8 characters.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-cream">Company name</label>

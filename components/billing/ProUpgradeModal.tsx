@@ -17,11 +17,11 @@ type Props = {
 const copy: Record<Variant, { title: string; body: string }> = {
   seeker: {
     title: "Upgrade to WorkVibe Pro",
-    body: "You've hit your 15 applications for today. Get unlimited access to your dream jobs with Pro.",
+    body: "You've used your one free credit. Upgrade to WorkVibe Pro for unlimited access and matching.",
   },
   employer: {
     title: "Upgrade to WorkVibe Pro",
-    body: "One job a day is great, but Pro lets you hire at scale with unlimited listings.",
+    body: "You've used your one free credit. Upgrade to WorkVibe Pro for unlimited access and matching.",
   },
 };
 

@@ -23,10 +23,7 @@ export async function POST(req: Request) {
 
   const allowed = await canPerformAction(userId, "APPLY");
   if (!allowed.allowed) {
-    return jsonError("Free tier application limit reached. Upgrade to continue.", 402, {
-      current: allowed.current,
-      limit: allowed.limit,
-    });
+    return jsonError("Free tier application limit reached. Upgrade to continue.", 402);
   }
 
   const job = await prisma.jobOpening.findUnique({

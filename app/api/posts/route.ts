@@ -17,10 +17,7 @@ export async function POST(req: Request) {
 
   const allowed = await canPerformAction(userId, "POST");
   if (!allowed.allowed) {
-    return jsonError("Free tier post limit reached. Upgrade to continue.", 402, {
-      current: allowed.current,
-      limit: allowed.limit,
-    });
+    return jsonError("Free tier post limit reached. Upgrade to continue.", 402);
   }
 
   const post = await prisma.post.create({

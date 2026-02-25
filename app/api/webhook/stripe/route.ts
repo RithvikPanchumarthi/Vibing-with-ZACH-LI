@@ -1,13 +1,9 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  typescript: true,
-});
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
@@ -23,7 +19,8 @@ export async function POST(req: Request) {
     return new NextResponse("Missing stripe-signature header", { status: 400 });
   }
 
-  let event: Stripe.Event;
+  const stripe = getStripe();
+  let event;
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: unknown) {
@@ -33,8 +30,8 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const userId = session.client_reference_id;
+    const session = event.data.object as { client_reference_id?: string | null };
+    const userId = session.client_reference_id ?? null;
 
     if (!userId) {
       return new NextResponse("User ID missing in session", { status: 400 });

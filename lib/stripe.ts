@@ -1,6 +1,16 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  typescript: true,
-});
+let cached: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (cached) return cached;
+
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error("Stripe is not configured (missing STRIPE_SECRET_KEY).");
+  }
+
+  cached = new Stripe(key, { typescript: true });
+  return cached;
+}
 

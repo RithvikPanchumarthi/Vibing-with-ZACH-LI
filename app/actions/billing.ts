@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { redirect } from "next/navigation";
 
 function requireEnv(name: string): string {
@@ -30,6 +30,7 @@ export async function createCheckoutSession(formData: FormData) {
     process.env.APP_URL ??
     "http://localhost:3000";
 
+  const stripe = getStripe();
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [{ price: priceId, quantity: 1 }],

@@ -1,22 +1,17 @@
 import { prisma } from "@/lib/prisma";
 
 export const LIMITS = {
-  POSTS: 3,
-  APPLICATIONS: 15,
+  POSTS: 1,
+  APPLICATIONS: 1,
   EMPLOYER_JOB_POSTS: 1,
-  EMPLOYER_COMPANY_POSTS: 3,
+  EMPLOYER_COMPANY_POSTS: 1,
 } as const;
 
 export type ActionType = "POST" | "APPLY" | "JOB_POST";
 
 export type LimitResult =
   | { allowed: true }
-  | { allowed: false; current: number; limit: number };
-
-function startOfTodayLocal(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-}
+  | { allowed: false };
 
 export async function canPerformAction(
   userId: string,
@@ -27,38 +22,30 @@ export async function canPerformAction(
     select: { isPremium: true },
   });
 
-  if (!user) {
-    return { allowed: false, current: 0, limit: 0 };
-  }
+  if (!user) return { allowed: false };
 
   if (user.isPremium) return { allowed: true };
 
-  const since = startOfTodayLocal();
-
   if (actionType === "POST") {
     const count = await prisma.post.count({
-      where: { userId, createdAt: { gte: since } },
+      where: { userId },
     });
-    if (count >= LIMITS.POSTS) return { allowed: false, current: count, limit: LIMITS.POSTS };
+    if (count >= LIMITS.POSTS) return { allowed: false };
     return { allowed: true };
   }
 
   if (actionType === "APPLY") {
     const count = await prisma.application.count({
-      where: { seekerId: userId, appliedAt: { gte: since } },
+      where: { seekerId: userId },
     });
-    if (count >= LIMITS.APPLICATIONS) {
-      return { allowed: false, current: count, limit: LIMITS.APPLICATIONS };
-    }
+    if (count >= LIMITS.APPLICATIONS) return { allowed: false };
     return { allowed: true };
   }
 
   const count = await prisma.jobOpening.count({
-    where: { employerId: userId, createdAt: { gte: since } },
+    where: { employerId: userId },
   });
-  if (count >= LIMITS.EMPLOYER_JOB_POSTS) {
-    return { allowed: false, current: count, limit: LIMITS.EMPLOYER_JOB_POSTS };
-  }
+  if (count >= LIMITS.EMPLOYER_JOB_POSTS) return { allowed: false };
   return { allowed: true };
 }
 

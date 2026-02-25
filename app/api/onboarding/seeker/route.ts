@@ -34,30 +34,32 @@ export async function POST(req: Request) {
   const safeFirstName = typeof firstName === "string" ? firstName.trim() : "";
   const safeLastName = typeof lastName === "string" ? lastName.trim() : "";
 
-  if (!Array.isArray(skills)) return jsonError("Skills must be an array.");
-  if (skills.length !== 20) return jsonError("Skills must be exactly 20 total.");
+  const normalizedSkills: Array<{ name: string; level: Level }> = [];
 
-  const seen = new Set<string>();
-  const counts: Record<Level, number> = { HIGH_CONFIDENCE: 0, MODERATE: 0, AWARE: 0 };
+  if (skills !== undefined) {
+    if (!Array.isArray(skills)) return jsonError("Skills must be an array.");
 
-  const normalized = skills.map((s) => {
-    if (!s || typeof s !== "object") return null;
-    const name = (s as Record<string, unknown>).name;
-    const level = (s as Record<string, unknown>).level;
-    if (typeof name !== "string") return null;
-    if (!isSkillLevel(level)) return null;
-    const n = normalizeTag(name);
-    if (!n) return null;
-    const key = n.toLowerCase();
-    if (seen.has(key)) return null;
-    seen.add(key);
-    counts[level] += 1;
-    return { name: n, level };
-  });
+    const seen = new Set<string>();
+    const counts: Record<Level, number> = { HIGH_CONFIDENCE: 0, MODERATE: 0, AWARE: 0 };
 
-  if (normalized.some((x) => x === null)) return jsonError("Invalid or duplicate skills.");
-  if (counts.HIGH_CONFIDENCE !== 5 || counts.MODERATE !== 10 || counts.AWARE !== 5) {
-    return jsonError("Skill limits must be 5 High, 10 Moderate, 5 Aware.");
+    for (const s of skills) {
+      if (!s || typeof s !== "object") return jsonError("Invalid skills.");
+      const name = (s as Record<string, unknown>).name;
+      const level = (s as Record<string, unknown>).level;
+      if (typeof name !== "string") return jsonError("Invalid skills.");
+      if (!isSkillLevel(level)) return jsonError("Invalid skills.");
+      const n = normalizeTag(name);
+      if (!n) return jsonError("Invalid skills.");
+      const key = n.toLowerCase();
+      if (seen.has(key)) return jsonError("Invalid or duplicate skills.");
+      seen.add(key);
+      counts[level] += 1;
+      normalizedSkills.push({ name: n, level });
+    }
+
+    if (counts.HIGH_CONFIDENCE > 5 || counts.MODERATE > 10 || counts.AWARE > 5) {
+      return jsonError("Skill limits are max 5 High, 10 Moderate, 5 Aware.");
+    }
   }
 
   const result = await prisma.user.upsert({
@@ -77,16 +79,18 @@ export async function POST(req: Request) {
     select: { id: true },
   });
 
-  const skillRows = (normalized as Array<{ name: string; level: Level }>).map((s) => ({
-    userId: result.id,
-    name: s.name,
-    level: s.level,
-  }));
+  if (skills !== undefined) {
+    const skillRows = normalizedSkills.map((s) => ({
+      userId: result.id,
+      name: s.name,
+      level: s.level,
+    }));
 
-  await prisma.$transaction([
-    prisma.userSkill.deleteMany({ where: { userId: result.id } }),
-    prisma.userSkill.createMany({ data: skillRows }),
-  ]);
+    await prisma.$transaction([
+      prisma.userSkill.deleteMany({ where: { userId: result.id } }),
+      ...(skillRows.length > 0 ? [prisma.userSkill.createMany({ data: skillRows })] : []),
+    ]);
+  }
 
   return NextResponse.json({ userId: result.id });
 }

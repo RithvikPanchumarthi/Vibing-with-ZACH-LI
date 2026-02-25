@@ -6,3 +6,46 @@
     @apply bg-[#121212] text-white;
   }
 }
+
+@layer utilities {
+  .wv-wordmark-glow {
+    text-shadow: 0 0 22px rgba(211, 251, 82, 0.28);
+  }
+
+  .wv-edge-fade {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent
+    );
+  }
+
+  @keyframes workvibe-marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .wv-marquee {
+    animation: workvibe-marquee 26s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wv-marquee {
+      animation: none;
+      transform: none;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { TagInput } from "@/components/ui/TagInput";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -22,6 +23,7 @@ function toPayload(high: string[], moderate: string[], aware: string[]): SkillPa
 
 export default function SeekerSignupPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
@@ -37,11 +39,7 @@ export default function SeekerSignupPage() {
     [high.length, moderate.length, aware.length],
   );
 
-  const isValid =
-    email.trim().length > 0 &&
-    counts.high === 5 &&
-    counts.moderate === 10 &&
-    counts.aware === 5;
+  const isValid = email.trim().length > 0 && password.length >= 8;
 
   async function handleSubmit() {
     setError(null);
@@ -52,6 +50,22 @@ export default function SeekerSignupPage() {
 
     setSubmitting(true);
     try {
+      const supabase = createSupabaseBrowserClient();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? window.location.origin;
+
+      const { error: signupError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${baseUrl}/api/auth/callback?next=/dashboard`,
+        },
+      });
+      if (signupError) {
+        setError(signupError.message);
+        return;
+      }
+
       const res = await fetch("/api/onboarding/seeker", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -59,7 +73,10 @@ export default function SeekerSignupPage() {
           email,
           firstName: firstName.trim() || null,
           lastName: lastName.trim() || null,
-          skills: toPayload(high, moderate, aware),
+          skills:
+            high.length + moderate.length + aware.length > 0
+              ? toPayload(high, moderate, aware)
+              : undefined,
         }),
       });
 
@@ -81,7 +98,11 @@ export default function SeekerSignupPage() {
         const id = (data as Record<string, unknown>).userId;
         return typeof id === "string" ? id : null;
       })();
-      window.location.href = userId ? `/signup/success?userId=${encodeURIComponent(userId)}` : "/signup/success";
+      if (userId) {
+        window.location.href = `/dashboard?seekerId=${encodeURIComponent(userId)}`;
+      } else {
+        window.location.href = "/login";
+      }
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -100,7 +121,7 @@ export default function SeekerSignupPage() {
           Job seeker onboarding
         </h1>
         <p className="mt-3 text-sm text-white/65 md:text-base">
-          Add your info and exactly 20 skills: 5 High Confidence, 10 Moderate, 5 Aware.
+          Create your account with email + password. Skills are optional — you can add them later.
         </p>
       </div>
 
@@ -120,6 +141,18 @@ export default function SeekerSignupPage() {
               placeholder="you@workvibe.com"
               className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20"
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-cream">Password</label>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              minLength={8}
+              placeholder="••••••••"
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/20"
+            />
+            <p className="text-xs text-white/45">Minimum 8 characters.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-cream">Name</label>
@@ -142,21 +175,21 @@ export default function SeekerSignupPage() {
 
         <TagInput
           label="High confidence skills"
-          description="Exactly 5. Your strongest signals."
+          description="Optional (up to 5). Your strongest signals."
           value={high}
           onChange={setHigh}
           max={5}
         />
         <TagInput
           label="Moderate skills"
-          description="Exactly 10. Skills you can confidently use."
+          description="Optional (up to 10). Skills you can confidently use."
           value={moderate}
           onChange={setModerate}
           max={10}
         />
         <TagInput
           label="Aware skills"
-          description="Exactly 5. Skills you're familiar with."
+          description="Optional (up to 5). Skills you're familiar with."
           value={aware}
           onChange={setAware}
           max={5}

@@ -1,0 +1,104 @@
+// WorkVibe Core Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  JOB_SEEKER
+  EMPLOYER
+}
+
+enum SkillLevel {
+  HIGH_CONFIDENCE // Top 5
+  MODERATE        // Top 10
+  AWARE           // Top 5
+}
+
+enum RequirementLevel {
+  REQUIRED        // Top 5
+  BETTER_TO_HAVE  // Top 10
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      UserRole
+  isPremium Boolean  @default(false)
+
+  // Profile Data
+  firstName   String?
+  lastName    String?
+  companyName String?
+
+  // Relations
+  skills       UserSkill[]
+  jobsPosted   JobOpening[]
+  applications Application[]
+  posts        Post[]
+
+  createdAt DateTime @default(now())
+}
+
+model UserSkill {
+  id     String     @id @default(uuid())
+  userId String
+  user   User       @relation(fields: [userId], references: [id])
+  name   String
+  level  SkillLevel
+
+  @@index([userId])
+}
+
+model JobOpening {
+  id               String        @id @default(uuid())
+  employerId       String
+  employer         User          @relation(fields: [employerId], references: [id])
+  roleName         String
+  responsibilities String
+  requirements     JobSkill[]
+  applications     Application[]
+  createdAt        DateTime      @default(now())
+
+  @@index([employerId])
+}
+
+model JobSkill {
+  id         String           @id @default(uuid())
+  jobId      String
+  job        JobOpening       @relation(fields: [jobId], references: [id])
+  name       String
+  importance RequirementLevel
+
+  @@index([jobId])
+}
+
+model Application {
+  id        String     @id @default(uuid())
+  seekerId  String
+  seeker    User       @relation(fields: [seekerId], references: [id])
+  jobId     String
+  job       JobOpening @relation(fields: [jobId], references: [id])
+  appliedAt DateTime   @default(now())
+
+  @@index([seekerId])
+  @@index([jobId])
+  @@unique([seekerId, jobId])
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+

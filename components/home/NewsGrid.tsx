@@ -18,7 +18,7 @@ const articles: Article[] = [
     title: "What we’re building for the AI economy",
     description: "Safer systems, better outcomes, real work — for everyone.",
     image:
-      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=80",
   },
 ];
 

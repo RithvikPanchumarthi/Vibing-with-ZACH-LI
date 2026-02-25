@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 const allRoles = [
   "bankers",
@@ -53,17 +53,6 @@ function randomInt(maxExclusive: number) {
   return Math.floor(Math.random() * maxExclusive);
 }
 
-function pickUniqueRoles(count: number) {
-  const pool = [...allRoles];
-  const picked: string[] = [];
-  while (picked.length < count && pool.length > 0) {
-    const idx = randomInt(pool.length);
-    picked.push(pool[idx]);
-    pool.splice(idx, 1);
-  }
-  return picked;
-}
-
 function styleForRole(role: string) {
   let hash = 0;
   for (let i = 0; i < role.length; i += 1) {
@@ -73,8 +62,9 @@ function styleForRole(role: string) {
 }
 
 export default function BuiltForEveryone() {
-  const initialRoles = useMemo(() => pickUniqueRoles(12), []);
-  const [visibleRoles, setVisibleRoles] = useState<string[]>(initialRoles);
+  const [visibleRoles, setVisibleRoles] = useState<string[]>(() =>
+    allRoles.slice(0, 12),
+  );
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {

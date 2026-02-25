@@ -5,13 +5,17 @@ import { Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-const THUMBNAIL_SRC =
-  "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=800&q=80";
-
 const fellows = [
-  { title: "Hear from fellows", label: "Fellow story • 2:14" },
-  { title: "Learning + earning", label: "Day in the life • 1:48" },
-  { title: "Safer AI by design", label: "Program talk • 4:12" },
+  {
+    title: "Hear from fellows",
+    label: "Fellow story • 2:14",
+    src: "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    title: "From application to impact",
+    label: "Fellow story • 1:58",
+    src: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
+  },
 ];
 
 export default function AiFeatureBlock() {
@@ -56,7 +60,7 @@ export default function AiFeatureBlock() {
                     <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#0f1016]">
                       <div className="relative aspect-video">
                         <Image
-                          src={THUMBNAIL_SRC}
+                          src={item.src}
                           alt={item.title}
                           fill
                           className="object-cover"

@@ -4,7 +4,7 @@
 WorkVibe is a Next.js 15 SaaS built for the DataExpert.io Vibe Coding Challenge. It replaces outdated keyword searches with a weighted "Vibe Match" algorithm that quantifies professional compatibility.
 
 ## 🚀 Live Demo
-**URL:** [https://workvibe.vercel.app](https://workvibe.vercel.app)
+**URL:** [[https://workvibe.vercel.app](https://workvibe.vercel.app)](https://vibing-with-zach-li-guvx.vercel.app/)
 
 ## 🧠 The Matching Engine (Core Innovation)
 Unlike traditional job boards, WorkVibe uses a weighted scoring system based on a **5-10-5 Skill Hierarchy**:
